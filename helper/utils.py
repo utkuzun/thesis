@@ -177,7 +177,7 @@ def non_dimensionalize_data(data, integrated=False):
         # crest submerge in presence of a crown wall
         data["Rc"] /= data["Hm0 toe"]
         # wave overtopping
-        data["q"] = (data["q"].values / np.sqrt(9.81 * (data["Hm0 toe"].values * data["Lm"].values) ** 3)).T
+        data["q"] = (data["q"].values / np.sqrt(9.81 * (data["Hm0 toe"].values) ** 3)).T
         # wave height at structure
         data["ht"] /= data["Hm0 toe"]
 
