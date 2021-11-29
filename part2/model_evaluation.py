@@ -183,5 +183,5 @@ dom_validity.to_excel(f"tables-2/dom_validty_part-2.xlsx", index= False, header=
 dom_validity_VER = domain_validity_table(X_train, X_test_VER, q_s_VER, q_ANN_VER)
 dom_validity_VER.to_excel(f"tables-2/dom_validty_VER_part-2.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
-print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_VER, q_s_VER)}")
-print(f"R^2 between EU_NN data is : {r2_score(q_ANN, q_s)} \nModel Evaluation done in {(time.time()-start_time)/60:5.3f} mins!!")
+print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_VER, q_s_VER):5.3f}")
+print(f"R^2 between EU_NN data is : {r2_score(q_ANN, q_s):5.3f} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
