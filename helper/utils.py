@@ -169,6 +169,7 @@ def non_dimensionalize_data(data, integrated=False):
 
     try:
         data["Lm"] = data["Tm1,0t"] ** 2 * 9.81 / 2 /np.pi
+        data["q non dim param"] = np.sqrt(9.81 * (data["Hm0 toe"].values) ** 3)
 
         # shoaling
         data["h"] /= data["Lm"]
@@ -217,10 +218,10 @@ def non_dimensionalize_data(data, integrated=False):
         print(Fore.RESET)
 
     if not integrated:
-        data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "wave obliquity", "crest submerge","depth at structure toe","db","q"]]
+        data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "wave obliquity", "crest submerge","depth at structure toe","q non dim param","db","q"]]
     else:
         data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "wave obliquity", "crest submerge","depth at structure toe",
-        "hb", "Xr", "wb","Parapet", "parapet", "delta_x","hr", "Wrb","db","q"]]
+        "hb", "Xr", "wb","Parapet", "parapet", "delta_x","hr", "Wrb","q non dim param","db","q"]]
 
     return data
 
@@ -284,7 +285,7 @@ def create_model(random_state,scale_samples=True, max_iter=1000):
     # pipes for y values
     logTransformer = FunctionTransformer(func=np.log10, inverse_func=scipy.special.exp10)  # log transform the targets
     targetTransform = make_pipeline(logTransformer, MinMaxScaler((0,1)))  # assign tranformer functions for the targets
-    targetPipe = TransformedTargetRegressor(regressor=MLPRegressor(random_state=random_state, max_iter=max_iter), transformer=targetTransform)  # do target pipeline
+    targetPipe = TransformedTargetRegressor(regressor=MLPRegressor(tol=1e-4,random_state=random_state, max_iter=max_iter), transformer=targetTransform)  # do target pipeline
 
     if scale_samples == "scale":
         model = Pipeline([("preprocess",preprocessor), ("targetTransform", targetPipe)])

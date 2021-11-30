@@ -24,16 +24,16 @@ from helper.utils import load_data, non_dimensionalize_data, create_paramGrid, c
 db_selection = "EU_NN"  #can be SWB or EU_NN
 integrated = True
 doGridCV = True
-CV_splitNumber = 3
+CV_splitNumber = 20
 scoring = ["r2", "neg_root_mean_squared_error"]
 refit = "r2"
 return_train_score = True
 scale_samples = "scale"
 part = "part-3"
 deneme = False
-max_iter = 1000
+max_iter = 5000
 # Parameters input
-random_state = np.random.RandomState(3)
+random_state = np.random.RandomState(41)
 
 """ 
 For the cv processed GridSearch takes an cv splitter. 
@@ -65,11 +65,11 @@ except Exception as error:
     print(Fore.RESET)
 
 
-feauture_names = data.drop(columns=["db", "q"]).columns
+feauture_names = data.drop(columns=["q non dim param","db", "q"]).columns
 
 # split into samples and targets
 print(data.info())
-samples = data.drop(columns=["db", "q"])
+samples = data.drop(columns=["q non dim param","db", "q"])
 targets = data["q"]
 
 # split for groups array of databases (SWB or Eurotop)

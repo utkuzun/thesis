@@ -24,16 +24,16 @@ from helper.utils import load_data, non_dimensionalize_data, create_paramGrid, c
 db_selection = "EU_NN"  #can be SWB or EU_NN
 integrated = True
 doGridCV = True
-CV_splitNumber = 3
+CV_splitNumber = 20
 scoring = ["r2", "neg_root_mean_squared_error"]
 refit = "r2"
 return_train_score = True
 scale_samples = "scale"
 part = "part-4"
 deneme = False
-max_iter = 1000
+max_iter = 10000
 # Parameters input
-random_state = np.random.RandomState(3)
+random_state = np.random.RandomState(41)
 
 """ 
 For the cv processed GridSearch takes an cv splitter. 
@@ -72,15 +72,22 @@ except Exception as error:
     print(f"Error in loading data : {error}")
     print(Fore.RESET)
 
+
+#take a portion of swb data
+data_SWB, data_SWB_to_add = train_test_split(data_SWB,
+    train_size = 1, 
+    random_state=random_state)
+
+
 data = data.concat([data, data_SWB], join="inner", ignore_index=True)
 data=data.dropna()
 print(f"Concatanated data has this shape {data.shape}...")
 
-feauture_names = data.drop(columns=["db", "q"]).columns
+feauture_names = data.drop(columns=["q non dim param","db", "q"]).columns
 
 # split into samples and targets
 print(data.info())
-samples = data.drop(columns=["db", "q"])
+samples = data.drop(columns=["q non dim param","db", "q"])
 targets = data["q"]
 
 # split for groups array of databases (SWB or Eurotop)
@@ -106,9 +113,9 @@ results_GridSearch = GridSearchCV_asses(model=model,X_train=X_train,param_grid=p
 
 try:
     if deneme:
-        results_GridSearch.to_excel(f"tables-3/GridCV_{part}_{scale_samples}_{deneme}.xlsx", index= False, header= True, sheet_name="Search Results", float_format="%.6f")
+        results_GridSearch.to_excel(f"tables-4/GridCV_{part}_{scale_samples}_{deneme}.xlsx", index= False, header= True, sheet_name="Search Results", float_format="%.6f")
     else:
-        results_GridSearch.to_excel(f"tables-3/GridCV_{part}_{scale_samples}.xlsx", index= False, header= True, sheet_name="Search Results", float_format="%.6f")
+        results_GridSearch.to_excel(f"tables-4/GridCV_{part}_{scale_samples}.xlsx", index= False, header= True, sheet_name="Search Results", float_format="%.6f")
 
     print("Results GridCV_table created!!")
 except Exception as err:

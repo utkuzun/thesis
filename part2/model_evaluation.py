@@ -35,8 +35,9 @@ from helper.utils import load_data, non_dimensionalize_data, domain_validity_tab
 params = {
     "activation" : "tanh",
     "solver" : "lbfgs",
-    "hidden_layer_sizes" : (40,),
-    "alpha" : 0.04
+    "hidden_layer_sizes" : (100,),
+    "alpha" : 0.01,
+    "tol" : 1e-4
 }
 
 # classification of the database/model
@@ -47,8 +48,8 @@ refit="r2"
 CV_splitNumber = 3
 integrated = False
 db_selection = "EU_NN"
-max_iter = 100
-
+max_iter = 5000
+resample_num = 15
 
 # Parameters input
 random_state = np.random.RandomState(41)
@@ -63,18 +64,15 @@ cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_stat
 
 data = load_data(db_selection=db_selection, integrated=integrated)
 data = non_dimensionalize_data(data, integrated=integrated)
-# print(Fore.RED)
-# print(f"Error in loading data : {error}")
-# print(Fore.RESET)
 
 feauture_names = data.drop(columns=["db", "q"]).columns
 
 # split into samples and targets
 print(data.info())
 print(data.shape)
-samples = data.drop(columns=["db", "q"])
+samples = data.drop(columns=["q non dim param","db", "q"])
 targets = data["q"]
-# targets = targets.reshape(-1, 1)
+
 
 # load data for SWB vertical database
 
@@ -87,18 +85,18 @@ except Exception as error:
     print(Fore.RESET)
 
 
-X_test_VER = data_test_VER.drop(columns=["db", "q"])
+X_test_VER = data_test_VER.drop(columns=["q non dim param","db", "q"]) 
 y_test_VER = data_test_VER["q"]
 
 
 # split for groups array of databases (SWB or Eurotop)
 
-groups = data["db"].values
-groups = groups.ravel()
+non_dim = data["q non dim param"].values
+non_dim = non_dim.ravel()
 
 # Split data to train, test
 
-X_train, X_test, y_train, y_test, groups_train, groups_test = train_test_split(samples, targets,groups,
+X_train, X_test, y_train, y_test, non_dim_train, non_dim_test = train_test_split(samples, targets,non_dim,
     test_size = 0.2, 
     random_state=random_state)
 
@@ -113,9 +111,9 @@ model = create_model_static(random_state=random_state,params=params,scale_sample
 # Draw learning curve
 
 if y_train.shape[0] <= 500:
-    steps = np.arange(5, 60, 5)
+    steps = np.arange(5, 60, 30)
 else:
-    steps = np.arange(25, 800, 25)
+    steps = np.arange(25, 800, 80)
 
 
 fig, ax1 = plt.subplots(figsize=(7, 7))
@@ -128,11 +126,11 @@ plt.savefig(f"graphs-2/learning_curve_{part}_{scale_samples}.png")
 # ###################################################################################
 # Draw metrics with test data from database
 
-estimation = get_q_ANN_with_resamples(model, X_train, y_train, X_test,y_test, random_state, 5)
-estimation.to_excel(f"tables-2/results_part-2.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+estimation = get_q_ANN_with_resamples(model, X_train, y_train, X_test,y_test, random_state, resample_num)
+estimation.to_excel(f"tables-2/results_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
 
-q_ANN = estimation["q_ANN"].values
-q_s = estimation["q_s"].values
+q_ANN = estimation["q_ANN"].values * non_dim_test
+q_s = estimation["q_s"].values * non_dim_test
 
 
 fig, axes = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
@@ -146,12 +144,12 @@ plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}.png")
 # Draw metrics with test data from METU vertical wall data
 
 
-estimation_VER = get_q_ANN_with_resamples(model, X_train, y_train, X_test_VER,y_test_VER, random_state, 5)
-estimation_VER.to_excel(f"tables-2/results_VER_part-2.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+estimation_VER = get_q_ANN_with_resamples(model, X_train, y_train, X_test_VER,y_test_VER, random_state, resample_num)
+estimation_VER.to_excel(f"tables-2/results_VER_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
 
 
-q_ANN_VER = estimation_VER["q_ANN"].values
-q_s_VER = estimation_VER["q_s"].values
+q_ANN_VER = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"].values
+q_s_VER = estimation_VER["q_s"].values * data_test_VER["q non dim param"].values
 
 fig2, axes2 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig2 = draw_metrics(X_test_VER,y_test_VER.values, q_ANN_VER, fig2,axes2, params)
@@ -163,7 +161,7 @@ plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}_VER.png")
 
 fig3, axfinal = plt.subplots(ncols=1, nrows=1, figsize=(7,7))
 
-axfinal.plot(X_train.values[:, 3], y_train.values.reshape(-1, 1), "or", markersize=2, label="training_data")
+axfinal.plot(X_train.values[:, 3], y_train.values.ravel() * non_dim_train.T, "or", markersize=2, label="training_data")
 axfinal.plot(X_test_VER.values[:, 3], q_ANN_VER, "ob", markersize=2, label="predictions")
 
 axfinal.set_ylabel("$ q_ANN $")
@@ -172,16 +170,16 @@ axfinal.set_yscale("log")
 axfinal.legend(loc= "best", prop={'size': 7})
 
 fig3.tight_layout()
-plt.savefig(f"graphs-2/prediction_vs_training_{part}_{scale_samples}_VER.png")
+plt.savefig(f"graphs-2/prediction_vs_training_{part}_{scale_samples}.png")
 
 # ####################################################################################
 # domain validity for test data
 
 dom_validity = domain_validity_table(X_train, X_test, q_s.ravel(), q_ANN.ravel())
-dom_validity.to_excel(f"tables-2/dom_validty_part-2.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
+dom_validity.to_excel(f"tables-2/dom_validty_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
 dom_validity_VER = domain_validity_table(X_train, X_test_VER, q_s_VER, q_ANN_VER)
-dom_validity_VER.to_excel(f"tables-2/dom_validty_VER_part-2.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
+dom_validity_VER.to_excel(f"tables-2/dom_validty_VER_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
 print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_VER, q_s_VER):5.3f}")
 print(f"R^2 between EU_NN data is : {r2_score(q_ANN, q_s):5.3f} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
