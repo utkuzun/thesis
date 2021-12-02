@@ -5,6 +5,7 @@
 
 from sklearn.model_selection import train_test_split, ShuffleSplit
 
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from colorama import Fore, Back, Style
@@ -24,14 +25,14 @@ from helper.utils import load_data, non_dimensionalize_data, create_paramGrid, c
 db_selection = "EU_NN"  #can be SWB or EU_NN
 integrated = True
 doGridCV = True
-CV_splitNumber = 20
+CV_splitNumber = 5
 scoring = ["r2", "neg_root_mean_squared_error"]
 refit = "r2"
 return_train_score = True
 scale_samples = "scale"
 part = "part-4"
 deneme = False
-max_iter = 10000
+max_iter = 5000
 # Parameters input
 random_state = np.random.RandomState(41)
 
@@ -74,13 +75,12 @@ except Exception as error:
 
 
 #take a portion of swb data
-data_SWB, data_SWB_to_add = train_test_split(data_SWB,
-    train_size = 1, 
-    random_state=random_state)
+# data_SWB, data_SWB_to_add = train_test_split(data_SWB,
+#     train_size = 1, 
+#     random_state=random_state)
 
 
-data = data.concat([data, data_SWB], join="inner", ignore_index=True)
-data=data.dropna()
+data = pd.concat([data, data_SWB], join="inner", ignore_index=True)
 print(f"Concatanated data has this shape {data.shape}...")
 
 feauture_names = data.drop(columns=["q non dim param","db", "q"]).columns

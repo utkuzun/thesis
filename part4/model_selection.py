@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 # ###################################################################################
 # Put static inputs
 part = "part-4"
-CV_splitNumber = 20
+CV_splitNumber = 5
 refit="r2"
 scale_samples = "scale"
 deneme=False
 activation = "tanh"
-base_alpha = 0
-base_hidden_layer = "(40,)" 
+base_alpha = 0.04
+base_hidden_layer = "(75,)" 
 
 # Parameters input
 prng = np.random.RandomState(41)

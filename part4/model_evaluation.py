@@ -16,7 +16,6 @@ from sklearn.exceptions import ConvergenceWarning
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy
 
 import os
 import sys
@@ -35,8 +34,9 @@ from helper.utils import load_data, non_dimensionalize_data, domain_validity_tab
 params = {
     "activation" : "tanh",
     "solver" : "lbfgs",
-    "hidden_layer_sizes" : (50,40),
-    "alpha" : 0.04
+    "hidden_layer_sizes" : (75,),
+    "alpha" : 0.04,
+    "tol" : 1e-4
 }
 
 # classification of the database/model
@@ -44,11 +44,11 @@ params = {
 scale_samples = "scale"
 part = "part-4"
 refit="r2"
-CV_splitNumber = 20
+CV_splitNumber = 3
 integrated = True
 db_selection = "EU_NN"
-max_iter = 10000
-resample_num = 50
+max_iter = 5000
+resample_num = 15
 
 
 # Parameters input
@@ -64,15 +64,6 @@ cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_stat
 
 data = load_data(db_selection=db_selection, integrated=integrated)
 data = non_dimensionalize_data(data, integrated=integrated)
-
-
-feauture_names = data.drop(columns=["db", "q"]).columns
-
-# split into samples and targets
-print(data.info())
-print(data.shape)
-samples = data.drop(columns=["q non dim param","db", "q"])
-targets = data["q"]
 
 
 # load data for SWB vertical database
@@ -100,8 +91,18 @@ data_test_SWB, data_test_SWB_to_add = train_test_split(data_test_SWB,
     random_state=random_state)
 
 
-data = data.concat([data, data_test_SWB_to_add], join="inner", ignore_index=True)
+data = pd.concat([data, data_test_SWB_to_add], join="inner", ignore_index=True)
 print(f"Concatanated data has this shape {data.shape}...")
+
+feauture_names = data.drop(columns=["db", "q"]).columns
+
+
+# split into samples and targets
+print(data.info())
+print(data.shape)
+samples = data.drop(columns=["q non dim param","db", "q"])
+targets = data["q"]
+
 
 X_test_VER = data_test_VER.drop(columns=["q non dim param","db", "q"])
 y_test_VER = data_test_VER["q"]
@@ -154,7 +155,7 @@ q_ANN = estimation["q_ANN"].values * non_dim_test
 q_s = estimation["q_s"].values * non_dim_test
 
 fig, axes = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
-fig = draw_metrics(X_test,y_test.values, q_ANN, fig,axes, params)
+fig = draw_metrics(X_test,q_s, q_ANN, fig,axes, params)
 
 fig.tight_layout()
 plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}.png")
@@ -172,7 +173,7 @@ q_ANN_VER = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"].va
 q_s_VER = estimation_VER["q_s"].values * data_test_VER["q non dim param"].values
 
 fig2, axes2 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
-fig2 = draw_metrics(X_test_VER,y_test_VER.values, q_ANN_VER, fig2,axes2, params)
+fig2 = draw_metrics(X_test_VER,q_s_VER, q_ANN_VER, fig2,axes2, params)
 fig2.tight_layout()
 plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_VER.png")
 
@@ -180,7 +181,7 @@ plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_VER.png")
 # ###################################################################################
 # Draw metrics with test data from METU vertical wall data
 
-estimation_SWB = get_q_ANN_with_resamples(model, X_train, y_train, X_test_SWB,y_test_SWB, random_state, 5)
+estimation_SWB = get_q_ANN_with_resamples(model, X_train, y_train, X_test_SWB,y_test_SWB, random_state, resample_num)
 estimation_SWB.to_excel(f"tables-4/results_SWB_part-2.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
 
 
@@ -188,7 +189,7 @@ q_ANN_SWB = estimation_SWB["q_ANN"].values * data_test_SWB["q non dim param"].va
 q_s_SWB = estimation_SWB["q_s"].values * data_test_SWB["q non dim param"].values
 
 fig3, axes3 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
-fig3 = draw_metrics(X_test_SWB,y_test_SWB.values, q_ANN_SWB, fig3,axes3, params)
+fig3 = draw_metrics(X_test_SWB,q_s_SWB, q_ANN_SWB, fig3,axes3, params)
 fig3.tight_layout()
 plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_SWB.png")
 
@@ -204,7 +205,7 @@ axfinal.plot(X_test_SWB.values[:, 3], q_ANN_SWB, "og", markersize=2, label="pred
 axfinal.set_ylabel("$ q_ANN $")
 axfinal.set_xlabel("$R_c / H_{m,0,t} $")
 axfinal.legend(loc= "best", prop={'size': 7})
-
+axfinal.set_yscale("log")
 fig3.tight_layout()
 plt.savefig(f"graphs-4/prediction_vs_training_{part}_{scale_samples}.png")
 
@@ -220,6 +221,6 @@ dom_validity_VER.to_excel(f"tables-4/dom_validty_VER_{part}.xlsx", index= False,
 dom_validity_SWB = domain_validity_table(X_train, X_test_SWB, q_s_SWB, q_ANN_SWB)
 dom_validity_SWB.to_excel(f"tables-4/dom_validty_SWB_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
-print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_SWB, q_s_SWB):5.3f}")
-print(f"R^2 between METU SWB data : {r2_score(q_ANN_SWB, q_s_SWB):5.3f}")
-print(f"R^2 between EU_NN data is : {r2_score(q_ANN, q_s)} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
+print(f"R^2 between METU vertical wall data : {r2_score(q_s_VER, q_ANN_VER):5.3f}")
+print(f"R^2 between METU SWB data : {r2_score(q_s_SWB, q_ANN_SWB):5.3f}")
+print(f"R^2 between EU_NN data is : {r2_score(q_s, q_ANN)} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
