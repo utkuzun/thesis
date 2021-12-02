@@ -16,7 +16,7 @@ refit="r2"
 scale_samples = "scale"
 deneme=False
 activation = "tanh"
-base_alpha = 0
+base_alpha = 0.18
 base_hidden_layer = "(40,)" 
 
 # Parameters input

@@ -35,8 +35,8 @@ from helper.utils import load_data, non_dimensionalize_data, domain_validity_tab
 params = {
     "activation" : "tanh",
     "solver" : "lbfgs",
-    "hidden_layer_sizes" : (100,),
-    "alpha" : 0.01,
+    "hidden_layer_sizes" : (75,),
+    "alpha" : 0.04,
     "tol" : 1e-4
 }
 
@@ -49,7 +49,7 @@ CV_splitNumber = 3
 integrated = False
 db_selection = "EU_NN"
 max_iter = 5000
-resample_num = 15
+resample_num = 10
 
 # Parameters input
 random_state = np.random.RandomState(41)
@@ -134,7 +134,7 @@ q_s = estimation["q_s"].values * non_dim_test
 
 
 fig, axes = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
-fig = draw_metrics(X_test,y_test.values, q_ANN, fig,axes, params)
+fig = draw_metrics(X_test,q_s, q_ANN, fig,axes, params)
 
 fig.tight_layout()
 plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}.png")
@@ -148,11 +148,11 @@ estimation_VER = get_q_ANN_with_resamples(model, X_train, y_train, X_test_VER,y_
 estimation_VER.to_excel(f"tables-2/results_VER_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
 
 
-q_ANN_VER = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"].values
-q_s_VER = estimation_VER["q_s"].values * data_test_VER["q non dim param"].values
+q_ANN_VER = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"]
+q_s_VER = estimation_VER["q_s"].values * data_test_VER["q non dim param"]
 
 fig2, axes2 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
-fig2 = draw_metrics(X_test_VER,y_test_VER.values, q_ANN_VER, fig2,axes2, params)
+fig2 = draw_metrics(X_test_VER,q_s_VER, q_ANN_VER, fig2,axes2, params)
 fig2.tight_layout()
 plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}_VER.png")
 
@@ -164,7 +164,7 @@ fig3, axfinal = plt.subplots(ncols=1, nrows=1, figsize=(7,7))
 axfinal.plot(X_train.values[:, 3], y_train.values.ravel() * non_dim_train.T, "or", markersize=2, label="training_data")
 axfinal.plot(X_test_VER.values[:, 3], q_ANN_VER, "ob", markersize=2, label="predictions")
 
-axfinal.set_ylabel("$ q_ANN $")
+axfinal.set_ylabel("$ q_{ANN} $")
 axfinal.set_xlabel("$R_c / H_{m,0,t} $")
 axfinal.set_yscale("log")
 axfinal.legend(loc= "best", prop={'size': 7})
@@ -181,5 +181,5 @@ dom_validity.to_excel(f"tables-2/dom_validty_{part}.xlsx", index= False, header=
 dom_validity_VER = domain_validity_table(X_train, X_test_VER, q_s_VER, q_ANN_VER)
 dom_validity_VER.to_excel(f"tables-2/dom_validty_VER_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
-print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_VER, q_s_VER):5.3f}")
-print(f"R^2 between EU_NN data is : {r2_score(q_ANN, q_s):5.3f} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
+print(f"R^2 between METU vertical wall data : {r2_score(q_s_VER, q_ANN_VER):5.3f}")
+print(f"R^2 between EU_NN data is : {r2_score(q_s, q_ANN):5.3f} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")

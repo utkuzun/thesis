@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 # ###################################################################################
 # Put static inputs
 part = "part-3"
-CV_splitNumber = 3
+CV_splitNumber = 20
 refit="r2"
 scale_samples = "scale"
 deneme=False
 activation = "tanh"
-base_alpha = 0
-base_hidden_layer = "(40,)" 
+base_alpha = 0.18
+base_hidden_layer = "(75,)" 
 
 
 # Parameters input
@@ -33,7 +33,6 @@ def take_hiddens_comp(base_alpha=0,activation="tanh"):
     hidden_layer_comp_df["max_test_score"] = results_GridSearch.loc[((results_GridSearch["alpha"] == base_alpha) & (results_GridSearch["activation"] ==activation))][[f"split{i}_test_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
     hidden_layer_comp_df["max_train_score"] = results_GridSearch.loc[((results_GridSearch["alpha"] == base_alpha) & (results_GridSearch["activation"] ==activation))][[f"split{i}_train_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
     hidden_layer_comp_df = hidden_layer_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False).drop_duplicates(subset="hidden_layer_sizes", keep="first")
-    print(hidden_layer_comp_df)
     return hidden_layer_comp_df
 
 
@@ -45,14 +44,13 @@ def take_alphas_comp(base_hidden_layer="(40,)",activation="tanh"):
     alpha_comp_df["max_test_score"] = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation))][[f"split{i}_test_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
     alpha_comp_df["max_train_score"] = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation))][[f"split{i}_train_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
     alpha_comp_df = alpha_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False).drop_duplicates(subset="alpha", keep="first")
-    print(alpha_comp_df)
     return alpha_comp_df
 
-hidden_layer_comp_df = take_hiddens_comp(activation=activation, base_hidden_layer=base_hidden_layer)
-alpha_comp_df = take_alphas_comp(activation=activation, base_alpha=base_alpha)
+hidden_layer_comp_df = take_hiddens_comp(activation=activation, base_alpha=base_alpha)
+alpha_comp_df = take_alphas_comp(activation=activation, base_hidden_layer=base_hidden_layer)
 
-hidden_layer_comp_df.to_excel(f"tables-3/metrics_eval_{part}_{scale_samples}.xlsx", index= False, header= True, sheet_name="hidden_layer", float_format="%.6f")
-# alpha_comp_df.to_excel(f"tables-2/metrics_eval_{part}_{scale_samples}.xlsx", index= False, header= True, sheet_name="alpha", float_format="%.6f")
+hidden_layer_comp_df.to_excel(f"tables-3/metrics_eval_{part}_{scale_samples}_hidden.xlsx", index= False, header= True, sheet_name="hidden_layer", float_format="%.6f")
+alpha_comp_df.to_excel(f"tables-3/metrics_eval_{part}_{scale_samples}_alpha.xlsx", index= False, header= True, sheet_name="alpha", float_format="%.6f")
 
 
 # #################################################

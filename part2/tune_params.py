@@ -48,7 +48,7 @@ cv = ShuffleSplit(n_splits=CV_splitNumber, test_size=0.2, random_state=random_st
 
 alphas = np.around(np.append(np.logspace(-2, 3, 9), np.array([0])),2)
 activations = ["relu", "tanh"]
-hidden_layers =  [(25,), (40,), (50,), (75,),(100,1), (30, 20), (50, 40), (85, 50)]
+hidden_layers =  [(25,), (40,), (50,), (75,),(100,), (30, 20), (50, 40), (85, 50)]
 
 
 param_grid = create_paramGrid(deneme=deneme, alphas=alphas, hidden_layers=hidden_layers, activations=activations)

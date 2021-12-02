@@ -37,7 +37,7 @@ def load_data(integrated=False, db_selection="SWB"):
     db_ANNtool_filename = os.path.abspath("../database/ANN work oın.xlsx")
 
     # used param for vertical wall data
-    ver_wall_params = ["mmm", "h", "Hm0 toe", "Rc", "q", "gf_d", "β", "Ac", "Tm1,0t", "ht"]
+    ver_wall_params = ["mmm", "h", "Hm0 toe", "Rc", "q", "gf_d", "Ac", "Tm1,0t", "ht"]
 
     # import SWB data
     if db_selection == "SWB":
@@ -202,7 +202,6 @@ def non_dimensionalize_data(data, integrated=False):
         # rename for actual representations of datas
         data = data.rename(columns= {
             "Hm0 toe" : "wave steepnes",
-            "β":"wave obliquity", 
             "h": "wave shoaling",
             "Ac" : "crest submerge",
             "Rc" : "crest submerge with crown wall",
@@ -218,9 +217,9 @@ def non_dimensionalize_data(data, integrated=False):
         print(Fore.RESET)
 
     if not integrated:
-        data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "wave obliquity", "crest submerge","depth at structure toe","q non dim param","db","q"]]
+        data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "crest submerge","depth at structure toe","q non dim param","db","q"]]
     else:
-        data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "wave obliquity", "crest submerge","depth at structure toe",
+        data = data.loc[:,  ["mmm", "wave shoaling", "wave steepnes", "crest submerge with crown wall", "roughness factor", "crest submerge","depth at structure toe",
         "hb", "Xr", "wb","Parapet", "parapet", "delta_x","hr", "Wrb","q non dim param","db","q"]]
 
     return data
