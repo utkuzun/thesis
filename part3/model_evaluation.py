@@ -36,7 +36,8 @@ params = {
     "activation" : "tanh",
     "solver" : "lbfgs",
     "hidden_layer_sizes" : (75,),
-    "alpha" : 0.04,
+    "alpha" : 0.18,
+    "tol" : 1e-4
 }
 
 # classification of the database/model
@@ -44,11 +45,11 @@ params = {
 scale_samples = "scale"
 part = "part-3"
 refit="r2"
-CV_splitNumber = 3
+CV_splitNumber = 1
 integrated = True
 db_selection = "EU_NN"
 max_iter = 5000
-resample_num = 10
+resample_num = 3
 
 
 # Parameters input
@@ -64,9 +65,8 @@ cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_stat
 
 data = load_data(db_selection=db_selection, integrated=integrated)
 data = non_dimensionalize_data(data, integrated=integrated)
+data.index += 2000
 
-
-feauture_names = data.drop(columns=["db", "q"]).columns
 
 # split into samples and targets
 print(data.info())
@@ -94,6 +94,7 @@ y_test_VER = data_test_VER["q"]
 try:
     data_test_SWB = load_data(db_selection="SWB", integrated=integrated)
     data_test_SWB = non_dimensionalize_data(data_test_SWB, integrated=integrated)
+    data_test_SWB.index += 1000
 except Exception as error:
     print(Fore.RED)
     print(f"Error in loading data : {error}")
@@ -123,17 +124,17 @@ model = create_model_static(random_state=random_state,params=params,scale_sample
 # ###################################################################################
 # Draw learning curve
 
-if y_train.shape[0] <= 500:
-    steps = np.arange(5, 60, 5)
-else:
-    steps = np.arange(25, 800, 25)
+# if y_train.shape[0] <= 500:
+#     steps = np.arange(5, 60, 5)
+# else:
+#     steps = np.arange(25, 800, 25)
 
 
-fig, ax1 = plt.subplots(figsize=(7, 7))
-fig = drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params, steps)
+# fig, ax1 = plt.subplots(figsize=(7, 7))
+# fig = drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params, steps)
 
-fig.tight_layout()
-plt.savefig(f"graphs-3/learning_curve_{part}_{scale_samples}.png")
+# fig.tight_layout()
+# plt.savefig(f"graphs-3/learning_curve_{part}_{scale_samples}.png")
 
 
 # ###################################################################################
@@ -206,7 +207,7 @@ plt.savefig(f"graphs-3/prediction_vs_training_{part}_{scale_samples}.png")
 # ####################################################################################
 # domain validity for test data
 
-dom_validity = domain_validity_table(X_train, X_test, q_s.ravel(), q_ANN.ravel())
+dom_validity = domain_validity_table(X_train, X_test, q_s, q_ANN)
 dom_validity.to_excel(f"tables-3/dom_validty_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
 dom_validity_VER = domain_validity_table(X_train, X_test_VER, q_s_VER, q_ANN_VER)

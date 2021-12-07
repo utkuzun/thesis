@@ -64,6 +64,7 @@ cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_stat
 
 data = load_data(db_selection=db_selection, integrated=integrated)
 data = non_dimensionalize_data(data, integrated=integrated)
+data.index += 2000
 
 
 # load data for SWB vertical database
@@ -79,6 +80,8 @@ except Exception as error:
 try:
     data_test_SWB = load_data(db_selection="SWB", integrated=integrated)
     data_test_SWB = non_dimensionalize_data(data_test_SWB, integrated=integrated)
+    data_test_SWB.index += 1000
+
 except Exception as error:
     print(Fore.RED)
     print(f"Error in loading data : {error}")
@@ -91,10 +94,8 @@ data_test_SWB, data_test_SWB_to_add = train_test_split(data_test_SWB,
     random_state=random_state)
 
 
-data = pd.concat([data, data_test_SWB_to_add], join="inner", ignore_index=True)
+data = pd.concat([data, data_test_SWB_to_add], join="inner", ignore_index=False)
 print(f"Concatanated data has this shape {data.shape}...")
-
-feauture_names = data.drop(columns=["db", "q"]).columns
 
 
 # split into samples and targets
@@ -212,7 +213,7 @@ plt.savefig(f"graphs-4/prediction_vs_training_{part}_{scale_samples}.png")
 # ####################################################################################
 # domain validity for test data
 
-dom_validity = domain_validity_table(X_train, X_test, q_s.ravel(), q_ANN.ravel())
+dom_validity = domain_validity_table(X_train, X_test, q_s, q_ANN)
 dom_validity.to_excel(f"tables-4/dom_validty_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
 dom_validity_VER = domain_validity_table(X_train, X_test_VER, q_s_VER, q_ANN_VER)

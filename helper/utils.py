@@ -228,13 +228,12 @@ def non_dimensionalize_data(data, integrated=False):
 def domain_validity_table(data_train,data_test, q_s,q_ANN ):
     # create table with which exceeds domain limits with data and domain table
     dom_validity = pd.DataFrame(columns=["Test ID","exc params","q_s","q_ANN", "E", "q_err"])
-    dom_validity["Test ID"] = data_test.index
+    dom_validity["Test ID"] = data_test.index +2
+    dom_validity.index = data_test.index
     dom_validity["q_ANN"] = q_ANN
     dom_validity["q_s"] = q_s
 
-    dom_validity["exc params"] = data_test.apply(lambda x: [col for col in data_test.columns if (x[col] < data_train.loc[:, col].min() or x[col] > data_train.loc[:, col].max() )],axis=1)
-
-
+    dom_validity["exc params"] = data_test.apply(lambda x: [col for col in data_test.columns if ((x[col] < data_train.loc[:, col].min()) or (x[col] > data_train.loc[:, col].max()) )],axis=1)
     dom_validity["q_err"] = (q_s.ravel() - q_ANN.ravel()) / q_s.ravel()
 
     return dom_validity

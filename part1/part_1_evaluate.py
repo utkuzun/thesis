@@ -18,14 +18,11 @@ directory = os.path.join(os.path.dirname(__file__), os.path.abspath(".."))
 sys.path.append(directory)
 
 
-from helper.utils import non_dimensionalize_data
-
-
 start = time.time()
 # ############################################
 # starter parameters
 
-q_EU_NN_filename = os.path.join(os.path.dirname(__file__), "utkuzun50files", "utkuzun50_144_web.txt")
+q_EU_NN_filename = os.path.join(os.path.dirname(__file__),"data-1", "utkuzun50files", "utkuzun50_268_web.txt")
 data_input_filename = os.path.abspath("../database/data.xlsx")
 domain_input_filename = os.path.abspath("../database/domain.csv")
 
@@ -85,13 +82,15 @@ ax1.plot(q_s.ravel(), q_ANN, "ob", label= "predictions", markersize=2)
 ax1.plot(q_s.ravel(), q_s.ravel(),"-r" ,label= "True",linewidth=2)
 ax1.set_ylabel("$q_{Eurotop ANN}$")
 ax1.set_xlabel("$q_s$")
-
+ax1.set_xscale("log")
+ax1.set_yscale("log")
 
 # Plot q error vs qs
 ax2.plot(q_s.ravel(), (q_s.ravel() - q_ANN.ravel()) / q_s.ravel(), "ob", markersize=2)
 ax2.axhline(y= 0, color="r", linestyle= "-",linewidth=2)
 ax2.set_ylabel("$(q_s - q_{Eurotop ANN}) / q_s $")
 ax2.set_xlabel("$q_s$")
+ax2.set_xscale("log")
 
 
 # Plot q error vs Rc
@@ -112,7 +111,7 @@ fig.tight_layout()
 dom_validity = pd.DataFrame(columns=["Test ID","exc params", "E", "q_err"])
 dom_validity["Test ID"] = data_actual_input["Test ID"]
 
-dom_validity["exc params"] = data_non_dimension.apply(lambda x: [col for col in data_non_dimension.columns if (x[col] < domain_data.loc[col, "min"] or x[col] > domain_data.loc[col, "max"] )],axis=1)
+dom_validity["exc params"] = data_non_dimension.apply(lambda x: [col for col in data_non_dimension.columns if ((x[col] < domain_data.loc[col, "min"]) or (x[col] > domain_data.loc[col, "max"] ))],axis=1)
 
 
 dom_validity["q_err"] = (q_s.ravel() - q_ANN.ravel()) / q_s.ravel()
