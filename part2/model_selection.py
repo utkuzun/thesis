@@ -37,32 +37,32 @@ if deneme:
 else:
     results_GridSearch =  pd.DataFrame(pd.read_excel(f"tables-2/GridCV_{part}_{scale_samples}.xlsx", header=0, sheet_name="Search Results"))
 
-def take_hiddens_comp(base_alpha=0,activation="tanh"):
+# def take_hiddens_comp(base_alpha=0,activation="tanh"):
 
-    hidden_layer_comp_df = results_GridSearch.loc[((results_GridSearch["activation"] ==activation)), [f"mean_test_{refit}", f"std_test_{refit}", "hidden_layer_sizes","param_targetTransform__regressor__alpha",  f"mean_train_{refit}", f"std_train_{refit}"]]
-    hidden_layer_comp_df["max_test_score"] = results_GridSearch.loc[( (results_GridSearch["activation"] ==activation))][[f"split{i}_test_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
-    hidden_layer_comp_df["max_train_score"] = results_GridSearch.loc[( (results_GridSearch["activation"] ==activation))][[f"split{i}_train_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
-    # hidden_layer_comp_df = hidden_layer_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False).drop_duplicates(subset="hidden_layer_sizes", keep="first")
-    hidden_layer_comp_df = hidden_layer_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False)
-    return hidden_layer_comp_df
-
-
-def take_alphas_comp(base_hidden_layer="(40,)",activation="tanh"):
+#     hidden_layer_comp_df = results_GridSearch.loc[((results_GridSearch["activation"] ==activation)), [f"mean_test_{refit}", f"std_test_{refit}", "hidden_layer_sizes","param_targetTransform__regressor__alpha",  f"mean_train_{refit}", f"std_train_{refit}"]]
+#     hidden_layer_comp_df["max_test_score"] = results_GridSearch.loc[( (results_GridSearch["activation"] ==activation))][[f"split{i}_test_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
+#     hidden_layer_comp_df["max_train_score"] = results_GridSearch.loc[( (results_GridSearch["activation"] ==activation))][[f"split{i}_train_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
+#     # hidden_layer_comp_df = hidden_layer_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False).drop_duplicates(subset="hidden_layer_sizes", keep="first")
+#     hidden_layer_comp_df = hidden_layer_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False)
+#     return hidden_layer_comp_df
 
 
-    alpha_comp_df = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation)), [f"mean_test_{refit}", f"std_test_{refit}", "param_targetTransform__regressor__alpha", f"mean_train_{refit}", f"std_train_{refit}"]]
-    alpha_comp_df = alpha_comp_df.rename({"param_targetTransform__regressor__alpha":"alpha"}, axis="columns")
-    alpha_comp_df["max_test_score"] = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation))][[f"split{i}_test_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
-    alpha_comp_df["max_train_score"] = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation))][[f"split{i}_train_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
-    alpha_comp_df = alpha_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False)
-    # alpha_comp_df = alpha_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False).drop_duplicates(subset="alpha", keep="first")
-    return alpha_comp_df
+# def take_alphas_comp(base_hidden_layer="(40,)",activation="tanh"):
 
-hidden_layer_comp_df = take_hiddens_comp(activation=activation, base_alpha=base_alpha)
-alpha_comp_df = take_alphas_comp(activation=activation, base_hidden_layer=base_hidden_layer)
 
-hidden_layer_comp_df.to_excel(f"tables-2/metrics_eval_{part}_{scale_samples}_hidden.xlsx", index= False, header= True, sheet_name="hidden_layer", float_format="%.6f")
-alpha_comp_df.to_excel(f"tables-2/metrics_eval_{part}_{scale_samples}_alphas.xlsx", index= False, header= True, sheet_name="alpha", float_format="%.6f")
+#     alpha_comp_df = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation)), [f"mean_test_{refit}", f"std_test_{refit}", "param_targetTransform__regressor__alpha", f"mean_train_{refit}", f"std_train_{refit}"]]
+#     alpha_comp_df = alpha_comp_df.rename({"param_targetTransform__regressor__alpha":"alpha"}, axis="columns")
+#     alpha_comp_df["max_test_score"] = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation))][[f"split{i}_test_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
+#     alpha_comp_df["max_train_score"] = results_GridSearch.loc[((results_GridSearch["hidden_layer_sizes"] == base_hidden_layer) & (results_GridSearch["activation"] == activation))][[f"split{i}_train_{refit}" for i in range(CV_splitNumber)]].values.max(axis=1)
+#     alpha_comp_df = alpha_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False)
+#     # alpha_comp_df = alpha_comp_df.sort_values(by=f"mean_test_{refit}", ascending=False).drop_duplicates(subset="alpha", keep="first")
+#     return alpha_comp_df
+
+# hidden_layer_comp_df = take_hiddens_comp(activation=activation, base_alpha=base_alpha)
+# alpha_comp_df = take_alphas_comp(activation=activation, base_hidden_layer=base_hidden_layer)
+
+# hidden_layer_comp_df.to_excel(f"tables-2/metrics_eval_{part}_{scale_samples}_hidden.xlsx", index= False, header= True, sheet_name="hidden_layer", float_format="%.6f")
+# alpha_comp_df.to_excel(f"tables-2/metrics_eval_{part}_{scale_samples}_alphas.xlsx", index= False, header= True, sheet_name="alpha", float_format="%.6f")
 
 
 # #################################################
@@ -80,7 +80,7 @@ data_tanh, alphas, hidden_layers = create_heatmap_data(results_GridSearch, activ
 alphas = [f"{alpha:3.3f}" for alpha in alphas]
 hidden_layers = [f"{hidden_layer}" for hidden_layer in hidden_layers]
 
-data_tanh[data_tanh<-0.5] = -0.5
+data_tanh[data_tanh<-0.5] = None
 
 im, cbar = heatmap(data_tanh, hidden_layers, alphas, ax=axgridCvTanh,
                    cmap="YlGn", cbarlabel="$r^2$")
@@ -103,7 +103,7 @@ data_relu, alphas, hidden_layers = create_heatmap_data(results_GridSearch, activ
 alphas = [f"{alpha:3.3f}" for alpha in alphas]
 hidden_layers = [f"{hidden_layer}" for hidden_layer in hidden_layers]
 
-data_relu[data_relu<-0.5] = -0.5
+data_relu[data_relu<-0.5] = None
 
 im, cbar = heatmap(data_relu, hidden_layers, alphas, ax=axgridCvRelu,
                    cmap="YlGn", cbarlabel="$r^2$")
