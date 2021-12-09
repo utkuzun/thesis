@@ -24,14 +24,14 @@ from helper.utils import load_data, non_dimensionalize_data, create_paramGrid, c
 db_selection = "EU_NN"  #can be SWB or EU_NN
 integrated = False
 doGridCV = True
-CV_splitNumber = 20
+CV_splitNumber = 50
 scoring = ["r2", "neg_root_mean_squared_error"]
 refit = "r2"
 return_train_score = True
 scale_samples = "scale"
 part = "part-2"
 deneme = False
-max_iter = 10000
+max_iter = 5000
 # Parameters input
 random_state = np.random.RandomState(41)
 

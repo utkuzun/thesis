@@ -24,7 +24,7 @@ from helper.utils import load_data, non_dimensionalize_data, create_paramGrid, c
 db_selection = "EU_NN"  #can be SWB or EU_NN
 integrated = True
 doGridCV = True
-CV_splitNumber = 5
+CV_splitNumber = 50
 scoring = ["r2", "neg_root_mean_squared_error"]
 refit = "r2"
 return_train_score = True

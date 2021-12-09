@@ -216,6 +216,6 @@ dom_validity_VER.to_excel(f"tables-3/dom_validty_VER_{part}.xlsx", index= False,
 dom_validity_SWB = domain_validity_table(X_train, X_test_SWB, q_s_SWB, q_ANN_SWB)
 dom_validity_SWB.to_excel(f"tables-3/dom_validty_SWB_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
-print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_SWB, q_s_SWB):5.3f}")
+print(f"R^2 between METU vertical wall data : {r2_score(q_ANN_VER, q_s_VER):5.3f}")
 print(f"R^2 between METU SWB data : {r2_score(q_ANN_SWB, q_s_SWB):5.3f}")
 print(f"R^2 between EU_NN data is : {r2_score(q_ANN, q_s):5.3f} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
