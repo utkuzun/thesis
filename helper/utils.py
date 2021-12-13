@@ -2,6 +2,7 @@
 # #########################################################################################
 # imports
 
+from pandas.core.base import DataError
 from pandas.core.frame import DataFrame
 from scipy.sparse.construct import random
 from sklearn.neural_network import MLPRegressor
@@ -311,6 +312,7 @@ def create_model_static(random_state,params, scale_samples=True, max_iter=1000):
     else:
         model = Pipeline([("targetTransform", targetPipe)])
 
+    print(model)
     return model
 
 
@@ -454,7 +456,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
     # Create colorbar
     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
     cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
-    cbar.ax.set_ylim(0, data.max())
+    cbar.ax.set_ylim(-0.5, np.nanmax(data))
 
     # Show all ticks and label them with the respective list entries.
     ax.set_xticks(np.arange(data.shape[1]), labels=col_labels)

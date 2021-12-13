@@ -70,7 +70,7 @@ q_ANN = data_EU["Prototype"].values
 q_data = pd.DataFrame(data = {"q_s" : q_s, "q_ANN": q_ANN})
 q_data = q_data.dropna()
 
-print(f"R^2 score calculated as : {r2_score(q_data['q_ANN'].values, q_data['q_s'].values):4.2f}")
+print(f"R^2 score calculated as : {r2_score(q_data['q_s'].values, q_data['q_ANN'].values):5.3f}")
 
 # ##################################################
 # Plot some graphs 
@@ -113,9 +113,10 @@ dom_validity["Test ID"] = data_actual_input["Test ID"]
 
 dom_validity["exc params"] = data_non_dimension.apply(lambda x: [col for col in data_non_dimension.columns if ((x[col] < domain_data.loc[col, "min"]) or (x[col] > domain_data.loc[col, "max"] ))],axis=1)
 
-
+dom_validity["q_s"] = q_s.ravel()
+dom_validity["q_ANN"] = q_ANN.ravel()
 dom_validity["q_err"] = (q_s.ravel() - q_ANN.ravel()) / q_s.ravel()
-dom_validity.to_excel(f"tables-1/dom_validty_part-1.xlsx", index= False, header= True, sheet_name="part1 domain exceedence", float_format="%.4f")
+dom_validity.to_excel(f"tables-1/dom_validty_part-1.xlsx", index= False, header= True, sheet_name="part1 domain exceedence", float_format="%.6f")
 
 plt.savefig(os.path.join(os.path.dirname(__file__), "graphs-1", "part_1_eval.png"))
 

@@ -33,10 +33,10 @@ from helper.utils import load_data, non_dimensionalize_data, domain_validity_tab
 # Put selected MLP parameters
 
 params = {
-    "activation" : "tanh",
+    "activation" : "relu",
     "solver" : "lbfgs",
-    "hidden_layer_sizes" : (75,),
-    "alpha" : 0.04,
+    "hidden_layer_sizes" : (30,20),
+    "alpha" : 0.18,
     "tol" : 1e-4
 }
 
@@ -45,14 +45,14 @@ params = {
 scale_samples = "scale"
 part = "part-2"
 refit="r2"
-CV_splitNumber = 3
+CV_splitNumber = 25
 integrated = False
 db_selection = "EU_NN"
 max_iter = 5000
-resample_num = 10
+resample_num = 50
 
 # Parameters input
-random_state = np.random.RandomState(41)
+random_state = np.random.RandomState(33)
 
 cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_state)
 # cv = CV_splitNumber
@@ -127,10 +127,12 @@ plt.savefig(f"graphs-2/learning_curve_{part}_{scale_samples}.png")
 # Draw metrics with test data from database
 
 estimation = get_q_ANN_with_resamples(model, X_train, y_train, X_test,y_test, random_state, resample_num)
+estimation["q_ANN"] = estimation["q_ANN"].values * non_dim_test
+estimation["q_s"] = estimation["q_s"].values * non_dim_test
 estimation.to_excel(f"tables-2/results_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
 
-q_ANN = estimation["q_ANN"].values * non_dim_test
-q_s = estimation["q_s"].values * non_dim_test
+q_ANN = estimation["q_ANN"].values
+q_s = estimation["q_s"].values
 
 
 fig, axes = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
@@ -145,11 +147,13 @@ plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}.png")
 
 
 estimation_VER = get_q_ANN_with_resamples(model, X_train, y_train, X_test_VER,y_test_VER, random_state, resample_num)
+estimation_VER["q_ANN"] = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"].values
+estimation_VER["q_s"] = estimation_VER["q_s"].values * data_test_VER["q non dim param"].values
 estimation_VER.to_excel(f"tables-2/results_VER_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
 
 
-q_ANN_VER = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"]
-q_s_VER = estimation_VER["q_s"].values * data_test_VER["q non dim param"]
+q_ANN_VER = estimation_VER["q_ANN"].values
+q_s_VER = estimation_VER["q_s"].values 
 
 fig2, axes2 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig2 = draw_metrics(X_test_VER,q_s_VER, q_ANN_VER, fig2,axes2, params)
@@ -159,15 +163,23 @@ plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}_VER.png")
 # ###################################################################################
 # Draw training samples vs SWB_ver samples
 
-fig3, axfinal = plt.subplots(ncols=1, nrows=1, figsize=(7,7))
+fig3, (axfinal, axfinal2) = plt.subplots(ncols=1, nrows=2, figsize=(12,7))
 
-axfinal.plot(X_train.values[:, 3], y_train.values.ravel() * non_dim_train.T, "or", markersize=2, label="training_data")
-axfinal.plot(X_test_VER.values[:, 3], q_ANN_VER, "ob", markersize=2, label="predictions")
+axfinal.plot(X_train.values[:, 3], y_train.values.ravel() * non_dim_train.T, "or", markersize=3, label="training_data")
+axfinal.plot(X_test_VER.values[:, 3], q_ANN_VER, "ob", markersize=3, label="predictions")
+
+axfinal2.plot(X_test_VER.values[:, 3], q_ANN_VER, "oc", markersize=3, label="predictions")
+axfinal2.plot(X_test_VER.values[:, 3], q_s_VER, "*r", markersize=3, label="measured")
 
 axfinal.set_ylabel("$ q_{ANN} $")
 axfinal.set_xlabel("$R_c / H_{m,0,t} $")
 axfinal.set_yscale("log")
 axfinal.legend(loc= "best", prop={'size': 7})
+
+axfinal2.set_ylabel("$ q_{ANN} $")
+axfinal2.set_xlabel("$R_c / H_{m,0,t} $")
+axfinal2.set_yscale("log")
+axfinal2.legend(loc= "best", prop={'size': 7})
 
 fig3.tight_layout()
 plt.savefig(f"graphs-2/prediction_vs_training_{part}_{scale_samples}.png")
