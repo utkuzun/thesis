@@ -9,7 +9,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
+from sklearn.metrics import  mean_squared_error, r2_score
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, FunctionTransformer
 from sklearn.pipeline import make_pipeline, Pipeline
@@ -551,3 +551,40 @@ def create_heatmap_data(results_GridSearch, activation, refit):
     data_np = [[data_pd.loc[((data_pd["alpha"] == alpha) & (data_pd["hidden_layer_sizes"] == hidden_layer)),f"mean_test_{refit}" ] for alpha in alphas] for hidden_layer in hidden_layers]
 
     return np.array(data_np), alphas, hidden_layers
+
+
+def results_table(estimation, estimation_VER, resample_num, estimation_SWB=None):
+
+    estimation_results = pd.DataFrame(data=None)
+    estimation_results_summary = pd.DataFrame(data=None)
+
+    for i in range(resample_num):
+        estimation_results = pd.concat([pd.DataFrame([r2_score(estimation["q_s"].values.ravel(), estimation[f"q_ANN_{i}"].values.ravel())], columns=['r2_EU']) for i in range(resample_num)], ignore_index=True)
+        estimation_results["rmse_EU"] = pd.concat([pd.DataFrame([mean_squared_error(estimation["q_s"].values.ravel(), estimation[f"q_ANN_{i}"].values.ravel(), squared=False)], columns=['rmse_EU']) for i in range(resample_num)], ignore_index=True).values
+        
+        estimation_results["r2_VER"] = pd.concat([pd.DataFrame([r2_score(estimation_VER["q_s"].values.ravel(), estimation_VER[f"q_ANN_{i}"].values.ravel())], columns=['r2_VER']) for i in range(resample_num)], ignore_index=True).values
+        estimation_results["rmse_VER"] = pd.concat([pd.DataFrame([mean_squared_error(estimation_VER["q_s"].values.ravel(), estimation_VER[f"q_ANN_{i}"].values.ravel(), squared=False)], columns=['rmse_VER']) for i in range(resample_num)], ignore_index=True).values
+
+
+        if estimation_SWB is not None:
+            estimation_results["r2_SWB"] = pd.concat([pd.DataFrame([r2_score(estimation_SWB["q_s"].values.ravel(), estimation_SWB[f"q_ANN_{i}"].values.ravel())], columns=['r2_SWB']) for i in range(resample_num)], ignore_index=True).values
+            estimation_results["rmse_SWB"] = pd.concat([pd.DataFrame([mean_squared_error(estimation_SWB["q_s"].values.ravel(), estimation_SWB[f"q_ANN_{i}"].values.ravel(), squared=False)], columns=['rmse_SWB']) for i in range(resample_num)], ignore_index=True).values
+
+    summary_data = {
+    "r2_EU" : f"{estimation_results['r2_EU'].mean():0.3f} +/- {estimation_results['r2_EU'].std():4.3f}",
+    "rmse_EU" : f"{estimation_results['rmse_EU'].mean():0.6f} +/- {estimation_results['rmse_EU'].std():0.6f}",
+
+    "r2_VER" : f"{estimation_results['r2_VER'].mean():0.3f} +/- {estimation_results['r2_VER'].std():4.3f}",
+    "rmse_VER" : f"{estimation_results['rmse_VER'].mean():0.6f} +/- {estimation_results['rmse_VER'].std():0.6f}",
+
+    "r2_SWB" : f"{estimation_results['r2_SWB'].mean():0.3f} +/- {estimation_results['r2_SWB'].std():4.3f}" if estimation_SWB is not None else None,
+    "rmse_SWB" : f"{estimation_results['rmse_SWB'].mean():0.6f} +/- {estimation_results['rmse_SWB'].std():0.6f}" if estimation_SWB is not None else None,
+
+    }
+
+    estimation_results_summary = estimation_results_summary.append(summary_data, ignore_index=True)
+
+    return estimation_results_summary, estimation_results
+
+
+

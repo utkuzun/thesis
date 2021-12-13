@@ -25,7 +25,7 @@ directory = os.path.join(os.path.dirname(__file__), os.path.abspath(".."))
 # setting path
 sys.path.append(directory)
 
-from helper.utils import load_data, non_dimensionalize_data, domain_validity_table, create_model_static, drawLearningCurve, draw_metrics, get_q_ANN_with_resamples
+from helper.utils import results_table,load_data, non_dimensionalize_data, domain_validity_table, create_model_static, drawLearningCurve, draw_metrics, get_q_ANN_with_resamples
 
 
 # ###################################################################################
@@ -52,7 +52,7 @@ resample_num = 50
 
 
 # Parameters input
-random_state = np.random.RandomState(33)
+random_state = np.random.RandomState(41)
 
 cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_state)
 # cv = CV_splitNumber
@@ -151,7 +151,9 @@ model = create_model_static(random_state=random_state,params=params,scale_sample
 estimation = get_q_ANN_with_resamples(model, X_train, y_train, X_test,y_test, random_state, resample_num)
 estimation["q_ANN"] = estimation["q_ANN"].values * non_dim_test
 estimation["q_s"] = estimation["q_s"].values * non_dim_test
-estimation.to_excel(f"tables-4/results_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+# estimation.to_excel(f"tables-4/results_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+for i in range(resample_num):
+    estimation[f"q_ANN_{i}"] = estimation[f"q_ANN_{i}"].values * non_dim_test
 
 
 q_ANN = estimation["q_ANN"].values 
@@ -171,7 +173,9 @@ plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}.png")
 estimation_VER = get_q_ANN_with_resamples(model, X_train, y_train, X_test_VER,y_test_VER, random_state, resample_num)
 estimation_VER["q_ANN"] = estimation_VER["q_ANN"].values * data_test_VER["q non dim param"].values
 estimation_VER["q_s"] = estimation_VER["q_s"].values * data_test_VER["q non dim param"].values
-estimation_VER.to_excel(f"tables-4/results_VER_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+# estimation_VER.to_excel(f"tables-4/results_VER_{part}.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+for i in range(resample_num):
+    estimation_VER[f"q_ANN_{i}"] = estimation_VER[f"q_ANN_{i}"].values * data_test_VER["q non dim param"].values
 
 
 q_ANN_VER = estimation_VER["q_ANN"].values 
@@ -189,7 +193,9 @@ plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_VER.png")
 estimation_SWB = get_q_ANN_with_resamples(model, X_train, y_train, X_test_SWB,y_test_SWB, random_state, resample_num)
 estimation_SWB["q_ANN"] = estimation_SWB["q_ANN"].values * data_test_SWB["q non dim param"].values
 estimation_SWB["q_s"] = estimation_SWB["q_s"].values * data_test_SWB["q non dim param"].values
-estimation_SWB.to_excel(f"tables-4/results_SWB_part-2.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+# estimation_SWB.to_excel(f"tables-4/results_SWB_part-2.xlsx", index= False, header= True, sheet_name="results", float_format="%.6f")
+for i in range(resample_num):
+    estimation_SWB[f"q_ANN_{i}"] = estimation_SWB[f"q_ANN_{i}"].values * data_test_SWB["q non dim param"].values
 
 
 q_ANN_SWB = estimation_SWB["q_ANN"].values 
@@ -236,14 +242,33 @@ plt.savefig(f"graphs-4/prediction_vs_training_{part}_{scale_samples}.png")
 # domain validity for test data
 
 dom_validity = domain_validity_table(X_train, X_test, q_s, q_ANN)
-dom_validity.to_excel(f"tables-4/dom_validty_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
+# dom_validity.to_excel(f"tables-4/dom_validty_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
 dom_validity_VER = domain_validity_table(X_train, X_test_VER, q_s_VER, q_ANN_VER)
-dom_validity_VER.to_excel(f"tables-4/dom_validty_VER_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
+# dom_validity_VER.to_excel(f"tables-4/dom_validty_VER_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
 
 dom_validity_SWB = domain_validity_table(X_train, X_test_SWB, q_s_SWB, q_ANN_SWB)
-dom_validity_SWB.to_excel(f"tables-4/dom_validty_SWB_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
+# dom_validity_SWB.to_excel(f"tables-4/dom_validty_SWB_{part}.xlsx", index= False, header= True, sheet_name="domain exceedence", float_format="%.6f")
+# #################################################################################
+# get result 
 
-print(f"R^2 between METU vertical wall data : {r2_score(q_s_VER, q_ANN_VER):5.3f}")
-print(f"R^2 between METU SWB data : {r2_score(q_s_SWB, q_ANN_SWB):5.3f}")
-print(f"R^2 between EU_NN data is : {r2_score(q_s, q_ANN):5.3f} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
+estimation_results_summary, estimation_results = results_table(estimation, estimation_VER, resample_num, estimation_SWB)
+
+with pd.ExcelWriter(f"tables-4/results_{part}.xlsx") as writer:
+
+    estimation.to_excel(writer, index= False, header= True, sheet_name="results EU", float_format="%.6f") 
+    dom_validity.to_excel(writer, index= False, header= True, sheet_name="domain exceedence EU", float_format="%.6f")
+    estimation_results_summary.to_excel(writer, index= False, header= True, sheet_name="results metrics summary", float_format="%.6f")
+    estimation_results.to_excel(writer, index= False, header= True, sheet_name="results metrics", float_format="%.6f")
+    
+    estimation_VER.to_excel(writer, index= False, header= True, sheet_name="results VER", float_format="%.6f") 
+    dom_validity_VER.to_excel(writer, index= False, header= True, sheet_name="domain exceedence SWB", float_format="%.6f")
+
+    estimation_SWB.to_excel(writer, index= False, header= True, sheet_name="results SWB", float_format="%.6f") 
+    dom_validity_SWB.to_excel(writer, index= False, header= True, sheet_name="domain exceedence SWB", float_format="%.6f")
+
+
+
+print(f"R^2 between METU vertical wall data : {estimation_results_summary['r2_VER'].values[0]}")
+print(f"R^2 between METU SWB data : {estimation_results_summary['r2_SWB'].values[0]}")
+print(f"R^2 between EU_NN data is : {estimation_results_summary['r2_EU'].values[0]} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
