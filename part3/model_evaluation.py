@@ -124,17 +124,17 @@ model = create_model_static(random_state=random_state,params=params,scale_sample
 # ###################################################################################
 # Draw learning curve
 
-# if y_train.shape[0] <= 500:
-#     steps = np.arange(5, 60, 5)
-# else:
-#     steps = np.arange(25, 800, 25)
+if y_train.shape[0] <= 500:
+    steps = np.arange(5, 60, 5)
+else:
+    steps = np.arange(25, 800, 25)
 
 
-# fig, ax1 = plt.subplots(figsize=(7, 7))
-# fig = drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params, steps)
+fig, ax1 = plt.subplots(figsize=(7, 7))
+fig = drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params)
 
-# fig.tight_layout()
-# plt.savefig(f"graphs-3/learning_curve_{part}_{scale_samples}.png")
+fig.tight_layout()
+plt.savefig(f"graphs-3/learning_curve_{part}_{scale_samples}.png")
 
 
 # ###################################################################################
@@ -264,6 +264,6 @@ with pd.ExcelWriter(f"tables-3/results_{part}.xlsx") as writer:
 
 
 
-print(f"R^2 between METU vertical wall data : {estimation_results_summary['r2_VER'].values[0]}")
-print(f"R^2 between METU SWB data : {estimation_results_summary['r2_SWB'].values[0]}")
-print(f"R^2 between EU_NN data is : {estimation_results_summary['r2_EU'].values[0]} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")
+print(f"R^2 between METU vertical wall data : {estimation_results_summary['r2_VER_act'].values[0]}")
+print(f"R^2 between METU SWB data : {estimation_results_summary['r2_SWB_act'].values[0]}")
+print(f"R^2 between EU_NN data is : {estimation_results_summary['r2_EU_act'].values[0]} \nModel Evaluation done in {(time.time()-start_time)/60:4.2f} mins!!")

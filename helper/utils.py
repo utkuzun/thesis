@@ -341,10 +341,13 @@ def GridSearchCV_asses(model,X_train, y_train,param_grid,cv,refit, scoring="r2",
 
     return results_GridSearch
 
-def drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params, steps):
+def drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params):
 
 
-    _, train_scores, test_scores = learning_curve(model, X_train.values, y_train.values.reshape(-1, 1), train_sizes=steps,cv=cv, scoring=refit, random_state=random_state)
+    steps, train_scores, test_scores = learning_curve(model, X_train.values, y_train.values.reshape(-1, 1),cv=cv,train_sizes=np.linspace(0.1, 1.0, 15), scoring=refit, random_state=random_state, n_jobs=-1)
+
+    train_scores[train_scores < 0 ] = 0
+    test_scores[test_scores < 0 ] = 0
 
     train_scores = np.mean(train_scores, axis=1)
     test_scores = np.mean(test_scores, axis=1)
@@ -579,6 +582,15 @@ def results_table(estimation, estimation_VER, resample_num, estimation_SWB=None)
 
     "r2_SWB" : f"{estimation_results['r2_SWB'].mean():0.3f} +/- {estimation_results['r2_SWB'].std():4.3f}" if estimation_SWB is not None else None,
     "rmse_SWB" : f"{estimation_results['rmse_SWB'].mean():0.6f} +/- {estimation_results['rmse_SWB'].std():0.6f}" if estimation_SWB is not None else None,
+
+    "r2_EU_act" : f'{r2_score(estimation["q_s"].values.ravel(),estimation["q_ANN"].values.ravel()):4.3f}',
+    "rmse_EU_act" : f'{mean_squared_error(estimation["q_s"].values.ravel(),estimation["q_ANN"].values.ravel(), squared=False):4.3f}',
+
+    "r2_VER_act" : f'{r2_score(estimation_VER["q_s"].values.ravel(),estimation_VER["q_ANN"].values.ravel()):4.3f}',
+    "rmse_VER_act" : f'{mean_squared_error(estimation_VER["q_s"].values.ravel(),estimation_VER["q_ANN"].values.ravel(), squared=False)}:4.3f',
+
+    "r2_SWB_act" : f'{r2_score(estimation_SWB["q_s"].values.ravel(),estimation_SWB["q_ANN"].values.ravel()):4.3f}' if estimation_SWB is not None else None,
+    "rmse_SWB_act" : f'{mean_squared_error(estimation_SWB["q_s"].values.ravel(),estimation_SWB["q_ANN"].values.ravel(), squared=False):4.3f}' if estimation_SWB is not None else None,
 
     }
 
