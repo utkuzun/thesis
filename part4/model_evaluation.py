@@ -35,7 +35,7 @@ params = {
     "activation" : "relu",
     "solver" : "lbfgs",
     "hidden_layer_sizes" : (30,20),
-    "alpha" : 0.18,
+    "alpha" : 0.75,
     "tol" : 1e-4
 }
 
@@ -141,7 +141,7 @@ fig, ax1 = plt.subplots(figsize=(7, 7))
 fig = drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params)
 
 fig.tight_layout()
-plt.savefig(f"graphs-4/learning_curve_{part}_{scale_samples}.png")
+plt.savefig(f"graphs-4/learning_curve_{part}_{scale_samples}_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 
 # ###################################################################################
@@ -163,7 +163,7 @@ fig, axes = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig = draw_metrics(X_test,q_s, q_ANN, fig,axes, params)
 
 fig.tight_layout()
-plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}.png")
+plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 
 # ###################################################################################
@@ -184,7 +184,7 @@ q_s_VER = estimation_VER["q_s"].values
 fig2, axes2 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig2 = draw_metrics(X_test_VER,q_s_VER, q_ANN_VER, fig2,axes2, params)
 fig2.tight_layout()
-plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_VER.png")
+plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_VER_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 
 # ###################################################################################
@@ -204,7 +204,7 @@ q_s_SWB = estimation_SWB["q_s"].values
 fig3, axes3 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig3 = draw_metrics(X_test_SWB,q_s_SWB, q_ANN_SWB, fig3,axes3, params)
 fig3.tight_layout()
-plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_SWB.png")
+plt.savefig(f"graphs-4/metrics_for_{part}_{scale_samples}_SWB_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 # ###################################################################################
 # Draw training samples vs SWB_ver samples
@@ -236,7 +236,7 @@ axfinal3.set_xlabel("$R_c / H_{m,0,t} $")
 axfinal3.set_yscale("log")
 axfinal3.legend(loc= "best", prop={'size': 7})
 fig3.tight_layout()
-plt.savefig(f"graphs-4/prediction_vs_training_{part}_{scale_samples}.png")
+plt.savefig(f"graphs-4/prediction_vs_training_{part}_{scale_samples}_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 # ####################################################################################
 # domain validity for test data
@@ -254,7 +254,7 @@ dom_validity_SWB = domain_validity_table(X_train, X_test_SWB, q_s_SWB, q_ANN_SWB
 
 estimation_results_summary, estimation_results = results_table(estimation, estimation_VER, resample_num, estimation_SWB)
 
-with pd.ExcelWriter(f"tables-4/results_{part}.xlsx") as writer:
+with pd.ExcelWriter(f"tables-4/results_{part}_{params['alpha']}_{params['hidden_layer_sizes']}.xlsx") as writer:
 
     estimation.to_excel(writer, index= False, header= True, sheet_name="results EU", float_format="%.6f") 
     dom_validity.to_excel(writer, index= False, header= True, sheet_name="domain exceedence EU", float_format="%.6f")

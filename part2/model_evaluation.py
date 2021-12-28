@@ -35,7 +35,7 @@ from helper.utils import load_data, non_dimensionalize_data, domain_validity_tab
 params = {
     "activation" : "relu",
     "solver" : "lbfgs",
-    "hidden_layer_sizes" : (30,20),
+    "hidden_layer_sizes" : (85,50),
     "alpha" : 0.18,
     "tol" : 1e-4
 }
@@ -55,7 +55,7 @@ resample_num = 50
 random_state = np.random.RandomState(33)
 
 cv = ShuffleSplit(n_splits=CV_splitNumber,test_size=0.2,random_state=random_state)
-# cv = CV_splitNumber
+# cv = CV_splitNumber 
 
 
 ########################################################################################
@@ -119,8 +119,8 @@ else:
 fig, ax1 = plt.subplots(figsize=(7, 7))
 fig = drawLearningCurve(fig, ax1, model, X_train, y_train, cv, refit, random_state, params)
 
-fig.tight_layout()
-plt.savefig(f"graphs-2/learning_curve_{part}_{scale_samples}.png")
+fig.tight_layout() 
+plt.savefig(f"graphs-2/learning_curve_{part}_{scale_samples}_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 
 # ###################################################################################
@@ -142,7 +142,7 @@ fig, axes = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig = draw_metrics(X_test,q_s, q_ANN, fig,axes, params)
 
 fig.tight_layout()
-plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}.png")
+plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 
 # ###################################################################################
@@ -163,7 +163,7 @@ q_s_VER = estimation_VER["q_s"].values
 fig2, axes2 = plt.subplots(ncols= 1, nrows= 3, figsize=(7, 10))
 fig2 = draw_metrics(X_test_VER,q_s_VER, q_ANN_VER, fig2,axes2, params)
 fig2.tight_layout()
-plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}_VER.png")
+plt.savefig(f"graphs-2/metrics_for_{part}_{scale_samples}_VER_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 # ###################################################################################
 # Draw training samples vs SWB_ver samples
@@ -187,7 +187,7 @@ axfinal2.set_yscale("log")
 axfinal2.legend(loc= "best", prop={'size': 7})
 
 fig3.tight_layout()
-plt.savefig(f"graphs-2/prediction_vs_training_{part}_{scale_samples}.png")
+plt.savefig(f"graphs-2/prediction_vs_training_{part}_{scale_samples}_{params['alpha']}_{params['hidden_layer_sizes']}.png")
 
 # ####################################################################################
 # domain validity for test data
@@ -206,7 +206,7 @@ estimation_results_summary, estimation_results = results_table(estimation, estim
 
 # write dataframes to excel
 
-with pd.ExcelWriter(f"tables-2/results_{part}.xlsx") as writer:
+with pd.ExcelWriter(f"tables-2/results_{part}_{params['alpha']}_{params['hidden_layer_sizes']}.xlsx") as writer:
 
     estimation.to_excel(writer, index= False, header= True, sheet_name="results EU", float_format="%.6f") 
     dom_validity.to_excel(writer, index= False, header= True, sheet_name="domain exceedence EU", float_format="%.6f")
